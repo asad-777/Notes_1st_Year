@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>English Poems Reference to Context</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Roboto:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary-color: #7c3aed;
+        --secondary-color: #10b981;
+        --dark-bg: #1e1e2f;
+        --card-bg: #2d2d44;
+        --text-light: #f3f4f6;
+        --accent: #f472b6;
+      }
+
+      body {
+        font-family: "Roboto", sans-serif;
+        background-color: var(--dark-bg);
+        color: var(--text-light);
+        transition: all 0.3s ease;
+      }
+
+      h1,
+      h2,
+      h3 {
+        font-family: "Playfair Display", serif;
+      }
+
+      .poem-card {
+        background-color: var(--card-bg);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      }
+
+      .poem-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+          0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      }
+
+      .poem-title,
+      .author-name {
+        color: var(--secondary-color);
+        font-weight: bold;
+      }
+
+      #search-input:focus {
+        border-color: var(--primary-color);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.3);
+      }
+
+      /* Theme toggle styles */
+      .theme-toggle {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 30px;
+      }
+
+      .theme-toggle input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #374151;
+        transition: 0.4s;
+        border-radius: 30px;
+      }
+
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 22px;
+        width: 22px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: 0.4s;
+        border-radius: 50%;
+      }
+
+      input:checked + .slider {
+        background-color: var(--primary-color);
+      }
+
+      input:checked + .slider:before {
+        transform: translateX(30px);
+      }
+
+      .light-theme {
+        --dark-bg: #f9fafb;
+        --card-bg: #ffffff;
+        --text-light: #1f2937;
+      }
+
+      .light-theme .poem-card {
+        border: 1px solid #e5e7eb;
+      }
+
+      .light-theme .credit-section {
+        background-color: #f3f4f6;
+        border-color: #7c3aed;
+        color: #1f2937;
+      }
+
+      .light-theme .credit-section h4 {
+        color: #7c3aed;
+      }
+
+      .light-theme .search-container {
+        background-color: #f3f4f6;
+        border: 1px solid #e5e7eb;
+      }
+
+      .light-theme #search-input {
+        background-color: #ffffff;
+        color: #1f2937;
+        border-color: #d1d5db;
+      }
+
+      .light-theme #search-dropdown {
+        background-color: #ffffff;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      }
+
+      .light-theme .dropdown-item:hover {
+        background-color: #f3f4f6;
+      }
+
+      /* Animation for loading poems */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .fadeIn {
+        animation: fadeIn 0.5s ease forwards;
+      }
+
+      /* Custom scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: var(--dark-bg);
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background-color: var(--primary-color);
+        border-radius: 20px;
+      }
+
+      /* Search dropdown styles */
+      .search-container {
+        position: relative;
+      }
+
+      #search-dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        max-height: 300px;
+        overflow-y: auto;
+        background-color: var(--card-bg);
+        border-radius: 0 0 8px 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        z-index: 10;
+        display: none;
+      }
+
+      #search-dropdown.show {
+        display: block;
+      }
+
+      .dropdown-item {
+        padding: 10px 15px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .dropdown-item:hover {
+        background-color: rgba(124, 58, 237, 0.2);
+      }
+
+      .dropdown-item:last-child {
+        border-bottom: none;
+      }
+
+      .poem-number {
+        font-weight: bold;
+        color: var(--primary-color);
+        margin-right: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container mx-auto px-4 py-8">
+      <!-- Header with theme toggle -->
+      <div class="grid md:flex md:items-center md:justify-between mb-6">
+        <div
+          class="credit-section p-3 rounded-lg bg-opacity-80 bg-gray-800 border border-purple-500"
+        >
+          <h4 class="text-lg font-bold text-purple-400">
+            Developed by Muhammad Asad Amir
+          </h4>
+          <p class="text-sm">For educational purposes.</p>
+        </div>
+        <div class="flex items-center mt-8 md:mt-0">
+          <span class="mr-2 text-sm"><i class="fas fa-moon"></i></span>
+          <label class="theme-toggle">
+            <input type="checkbox" id="theme-toggle" />
+            <span class="slider"></span>
+          </label>
+          <span class="ml-2 text-sm"><i class="fas fa-sun"></i></span>
+        </div>
+      </div>
+
+      <div class="text-center mb-10">
+        <h1 class="text-4xl md:text-5xl font-bold text-purple-400 mb-4">
+          English Poems Reference to Context
+        </h1>
+        <p class="text-lg opacity-80">
+          A collection of notable poems and their contextual meanings for 1st
+          Year
+        </p>
+      </div>
+
+      <!-- Search section -->
+      <div class="mb-8 bg-gray-800 bg-opacity-50 p-6 rounded-lg shadow-lg">
+        <div class="w-full mx-auto md:w-2/3">
+          <div class="search-container">
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                <i class="fas fa-search text-gray-400"></i>
+              </span>
+              <input
+                id="search-input"
+                type="text"
+                placeholder="Search by poem title or author name..."
+                class="w-full pl-10 pr-4 py-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-purple-500"
+              />
+            </div>
+            <div id="search-dropdown" class="rounded-lg mt-1">
+              <!-- Dropdown items will be inserted here by JavaScript -->
+            </div>
+          </div>
+          <p class="text-center mt-2 text-sm text-gray-400">
+            Click on a poem from the dropdown or type to search
+          </p>
+        </div>
+      </div>
+
+      <!-- Poems grid layout -->
+      <div id="poems-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Poems will be dynamically inserted here by JavaScript -->
+      </div>
+
+      <!-- Empty state message -->
+      <div id="empty-state" class="hidden text-center py-20">
+        <i class="fas fa-search text-5xl text-gray-500 mb-4"></i>
+        <h3 class="text-2xl font-semibold">No poems found</h3>
+        <p class="mt-2 text-gray-400">Try adjusting your search criteria</p>
+      </div>
+
+      <!-- Back to top button -->
+      <button
+        id="back-to-top"
+        class="fixed bottom-8 right-8 bg-purple-600 text-white p-3 rounded-full shadow-lg opacity-0 transition-opacity duration-300"
+      >
+        <i class="fas fa-arrow-up"></i>
+      </button>
+    </div>
+
+    <script>
+      // Poem data
+      const poemsData = [
+        {
+          id: 1,
+          title: "The Rain",
+          author: "William Henry Davies",
+          context:
+            "The poem symbolically represents society, where the upper leaves of the trees depict the rich, and the lower leaves represent the poor. The sunshine signifies a future where poverty will end, and nature's blessings will be fairly distributed.",
+        },
+        {
+          id: 2,
+          title: "Night Mail",
+          author: "Wystan Hugh Auden",
+          context:
+            '"Night Mail" describes a train that delivers letters, cheques, and postal orders without discrimination. It faces many obstacles along its journey but never fails to reach its destination on time.',
+        },
+        {
+          id: 3,
+          title: "Loveliest of Trees, the Cherry Now",
+          author: "Alfred Edward Housman",
+          context:
+            "The poem expresses the poet's love for nature, nostalgia for the past, and awareness of human mortality. While admiring the perpetual renewal of nature, he reflects on the brevity of human life.",
+        },
+        {
+          id: 4,
+          title: "O Where Are You Going?",
+          author: "Wystan Hugh Auden",
+          context:
+            "The poem highlights the discouragement and fears that hinder human progress. Despite these obstacles, it emphasizes that perseverance and courage can lead to success.",
+        },
+        {
+          id: 5,
+          title: "In the Street of the Fruit Stalls",
+          author: "Jan Stallworthy",
+          context:
+            "This symbolic poem portrays war, misery, and poverty as major threats to the world. However, the human spirit remains resilient, as seen in the children enjoying fruit, momentarily forgetting their hardships.",
+        },
+        {
+          id: 6,
+          title: "A Sindhi Woman",
+          author: "Jan Stallworthy",
+          context:
+            "The poem describes a Sindhi woman carrying a heavy jar on her head as she walks effortlessly through the bazaar. It symbolizes how those who endure hardships develop strength and resilience.",
+        },
+        {
+          id: 7,
+          title: "Times",
+          author: "King James Bible",
+          context:
+            "The poem emphasizes the importance of time in life. Everything follows a specific timeline, and success depends on the timing of actions and decisions. Time is the ultimate planner, shaping events and experiences.",
+        },
+        {
+          id: 8,
+          title: "Ozymandias",
+          author: "P.B. Shelley",
+          context:
+            "This poem is an ironic reflection on the transient nature of power and glory. Referring to Pharaoh Ramses II, it demonstrates that even the mightiest rulers cannot escape the ravages of time.",
+        },
+        {
+          id: 9,
+          title: "The Feed",
+          author: "Ahmed Nadeem Qasmi",
+          context:
+            "The poem highlights the global problem of food scarcity and overpopulation. The poet criticizes humanity for using scientific advancements for destruction instead of addressing critical issues like hunger.",
+        },
+        {
+          id: 10,
+          title: "The Hollow Men",
+          author: "T.S. Eliot",
+          context:
+            "The poem describes modern humanity as soulless and spiritually empty. People appear to function but lack true purpose, resembling hollow figures incapable of forming meaningful connections.",
+        },
+        {
+          id: 11,
+          title: "Leisure",
+          author: "W. H. Davies",
+          context:
+            "The poem argues that a life consumed by materialism is filled with worries. It stresses the need for leisure and appreciation of nature to achieve happiness and fulfillment.",
+        },
+        {
+          id: 12,
+          title: "Ruba'iyat",
+          author: "Allama Muhammad Iqbal",
+          context:
+            "Addressing Muslims, the poet emphasizes that their unity, strength, and survival depend on strong faith. He asserts that belief in God ensures success, freedom, and glory.",
+        },
+        {
+          id: 13,
+          title: "A Tale of Two Cities",
+          author: "John Peter",
+          context:
+            "This poem revisits the tragic consequences of war, particularly the devastation caused by nuclear weapons. It serves as a critique of war, highlighting its destructive impact on humanity.",
+        },
+        {
+          id: 14,
+          title: "My Neighbor Friend Breathing His Last!",
+          author: "Bullah Shah (Translated by A. R. Luther)",
+          context:
+            "The poem expresses deep sorrow over a friend's passing. Despite his grief, the poet finds solace in God's love, acknowledging that divine grace provides strength during life’s trials.",
+        },
+        {
+          id: 15,
+          title: "He Came to Know Himself",
+          author: "Sachal Sarmast",
+          context:
+            "The poem focuses on self-realization and spiritual enlightenment. It portrays the journey of the soul as it seeks to transcend physical existence and connect with the divine.",
+        },
+        {
+          id: 16,
+          title: "God's Attributes",
+          author: "Jalaluddin Rumi (Translated by Dr. Nicholson)",
+          context:
+            "The poem explores the powerful attributes of God. Awareness of God's knowledge and presence leads people toward righteousness and deters them from sin.",
+        },
+        {
+          id: 17,
+          title: "The Delight Song",
+          author: "N. Scott Momaday",
+          context:
+            "The poem highlights the beauty of nature and its role in spiritual and mental nourishment. A deep connection with the universe brings inner peace and happiness.",
+        },
+        {
+          id: 18,
+          title: "Love – An Essence of All Religion",
+          author: "Jalaluddin Rumi (Translated by Dr. Nicholson)",
+          context:
+            "The poem asserts that love is a divine force and the foundation of all religions. Love enriches human relationships and gives life meaning and purpose.",
+        },
+        {
+          id: 19,
+          title: "A Man of Words and Not of Deeds",
+          author: "Charles Perrault (Translated by Robert Samber)",
+          context:
+            "The poem teaches the importance of action. Mere words are meaningless without corresponding effort. Success comes from actions, while idleness leads to failure.",
+        },
+        {
+          id: 20,
+          title: "In Broken Images",
+          author: "Robert Graves",
+          context:
+            "The poem explores the complexity of understanding and perception. Those who accept uncertainty and continuously seek knowledge ultimately gain deeper insights into life.",
+        },
+      ];
+
+      // DOM elements
+      const poemsContainer = document.getElementById("poems-container");
+      const searchInput = document.getElementById("search-input");
+      const searchDropdown = document.getElementById("search-dropdown");
+      const emptyState = document.getElementById("empty-state");
+      const backToTopButton = document.getElementById("back-to-top");
+      const themeToggle = document.getElementById("theme-toggle");
+
+      // Variables to track current state
+      let currentSearch = "";
+      let visiblePoems = [...poemsData];
+
+      // Create poem cards
+      function createPoemCard(poem, index) {
+        const delay = index * 0.1;
+        const card = document.createElement("div");
+        card.className = `poem-card rounded-lg overflow-hidden shadow-lg fadeIn`;
+        card.style.animationDelay = `${delay}s`;
+
+        // Random gradient colors for card header
+        const gradients = [
+          "from-purple-600 to-blue-500",
+          "from-green-500 to-teal-400",
+          "from-pink-500 to-rose-400",
+          "from-yellow-400 to-orange-500",
+          "from-indigo-500 to-purple-400",
+        ];
+
+        const randomGradient =
+          gradients[Math.floor(Math.random() * gradients.length)];
+
+        card.innerHTML = `
+                <div class="bg-gradient-to-r ${randomGradient} p-4 pl-8">
+                    <h2 class="text-xl font-bold text-white">${poem.id}. ${poem.title}</h2>
+                    <p class="text-white text-opacity-80 text-sm">by ${poem.author}</p>
+                </div>
+                <div class="p-4">
+                    <div class="mb-3">
+                        <h3 class="text-secondary-color font-bold mb-1">Reference</h3>
+                        <p>These lines have been taken from the poem <span class="poem-title">${poem.title}</span> written by <span class="author-name">${poem.author}</span>.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-secondary-color font-semibold mb-1">Context</h3>
+                        <p>${poem.context}</p>
+                    </div>
+                </div>
+            `;
+
+        return card;
+      }
+
+      // Create dropdown items for search
+      function createDropdownItems(searchTerm) {
+        searchDropdown.innerHTML = "";
+
+        if (!searchTerm.trim()) {
+          searchDropdown.classList.remove("show");
+          return;
+        }
+
+        const matchedPoems = poemsData.filter(
+          (poem) =>
+            poem.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            poem.author.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+
+        if (matchedPoems.length === 0) {
+          searchDropdown.classList.remove("show");
+          return;
+        }
+
+        matchedPoems.forEach((poem) => {
+          const item = document.createElement("div");
+          item.className = "dropdown-item";
+          item.innerHTML = `
+                    <span class="poem-number">#${poem.id}</span>
+                    <span class="font-medium">${poem.title}</span>
+                    <span class="text-sm text-gray-400"> by ${poem.author}</span>
+                `;
+
+          item.addEventListener("click", () => {
+            searchInput.value = poem.title;
+            currentSearch = poem.title.toLowerCase();
+            searchDropdown.classList.remove("show");
+            displayPoems();
+          });
+
+          searchDropdown.appendChild(item);
+        });
+
+        searchDropdown.classList.add("show");
+      }
+
+      // Display poems based on current search
+      function displayPoems() {
+        // Clear container
+        poemsContainer.innerHTML = "";
+
+        // Filter poems based on search query
+        visiblePoems = poemsData.filter((poem) => {
+          const matchesSearch =
+            poem.title.toLowerCase().includes(currentSearch) ||
+            poem.author.toLowerCase().includes(currentSearch) ||
+            poem.context.toLowerCase().includes(currentSearch);
+          return matchesSearch;
+        });
+
+        // Show/hide empty state
+        if (visiblePoems.length === 0) {
+          emptyState.classList.remove("hidden");
+        } else {
+          emptyState.classList.add("hidden");
+
+          // Create and append poem cards
+          visiblePoems.forEach((poem, index) => {
+            const card = createPoemCard(poem, index);
+            poemsContainer.appendChild(card);
+          });
+        }
+      }
+
+      // Initialize the display
+      displayPoems();
+
+      // Event listeners
+      searchInput.addEventListener("input", (e) => {
+        currentSearch = e.target.value.toLowerCase();
+        createDropdownItems(e.target.value);
+        displayPoems();
+      });
+
+      searchInput.addEventListener("focus", () => {
+        if (searchInput.value.trim()) {
+          createDropdownItems(searchInput.value);
+        }
+      });
+
+      // Close dropdown when clicking outside
+      document.addEventListener("click", (e) => {
+        if (
+          !searchInput.contains(e.target) &&
+          !searchDropdown.contains(e.target)
+        ) {
+          searchDropdown.classList.remove("show");
+        }
+      });
+
+      // Back to top functionality
+      window.addEventListener("scroll", () => {
+        if (window.scrollY > 300) {
+          backToTopButton.classList.remove("opacity-0");
+        } else {
+          backToTopButton.classList.add("opacity-0");
+        }
+      });
+
+      backToTopButton.addEventListener("click", () => {
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        });
+      });
+
+      // Theme toggle with enhanced light theme
+      themeToggle.addEventListener("change", () => {
+        if (themeToggle.checked) {
+          document.body.classList.add("light-theme");
+        } else {
+          document.body.classList.remove("light-theme");
+        }
+      });
+
+      // Animation for cards when they enter viewport
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("fadeIn");
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.1 }
+      );
+
+      // Observe all poem cards after they're created
+      setTimeout(() => {
+        document.querySelectorAll(".poem-card").forEach((card) => {
+          observer.observe(card);
+        });
+      }, 100);
+    </script>
+  </body>
+</html>
